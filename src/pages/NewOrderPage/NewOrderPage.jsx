@@ -1,14 +1,19 @@
 import { useState, useEffect } from 'react';
+import * as itemsAPI from '../../utilities/items-api';
 
 export default function NewOrderPage() {
   const [menuItems, setMenuItems] = useState([]);
 
-  useEffect(function() {
-    console.log('NewOrderPage rendered');
-  });
+  // useEffect(function() {
+  //   console.log('NewOrderPage rendered');
+  // });
   
   useEffect(function() {
-    console.log('NewOrderPage rendered for the first time');
+    async function getItems() {
+      const items = await itemsAPI.getAll();
+      setMenuItems(items);
+    }
+    getItems();
   }, []);
   // the empty dependency array above will result in 
   // the function running after the FIRST render
