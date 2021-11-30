@@ -49,4 +49,35 @@ orderSchema.statics.getCart = function(userId) {
   );
 };
 
+orderSchema.methods.addItemToCart = async function(itemId) {
+  // 'this' is bound to the cart (order doc)
+  const cart = this;
+  // Check if the itme is already in the cart
+  const lineItem = cart.lineItems.find(lineItem => lineItem.item._id.equals(itemId));
+  if (lineItem) {
+    // Item already exists, increase its qty
+    lineItem.qty += 1;
+  } else {
+    const item = await mongoose.model('Item').findById(itemId);
+    cart.lineItems.push({ item });
+  }
+  return cart.save();
+};
+
+orderSchema.methods.setItemQty = function(itemId, newQty) {
+  // this keyword is bound to the cart (order doc)
+  const cart = this;
+  // Find the line item in the cart for the menu item
+  const lineItem = cart.lineItems.find(lineItem => lineItem.item._id.equals(itemId));
+  if (lineItem && newQty <= 0) {
+    // Calling remove, removes itself from the cart.lineItems array
+    lineItem.remove();
+  } else if (lineItem) {
+    // Set the new qty - positive value is assured thanks to prev if
+    lineItem.qty = newQty;
+  }
+  // return the save() method's promise
+  return cart.save();
+};
+
 module.exports = mongoose.model('Order', orderSchema);
